@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -12,7 +10,7 @@ class Card_1 extends StatefulWidget {
 }
 
 class _Card_1State extends State<Card_1> {
-  CollectionReference Video = FirebaseFirestore.instance.collection('Video');
+  CollectionReference video = FirebaseFirestore.instance.collection('Video');
   late VideoPlayerController _controller;
   @override
   void initState() {
@@ -31,7 +29,8 @@ class _Card_1State extends State<Card_1> {
       appBar: AppBar(
         title: const Text("ท่า 1"),
       ),
-      body: content(),
+      body: 
+      content(),
       floatingActionButton: FloatingActionButton(
           child: Icon(
               _controller.value.isPlaying ? Icons.pause : Icons.play_arrow),
