@@ -52,7 +52,7 @@ class _ContactsState extends State<Contacts> {
                       itemBuilder: (context, index) {
                         final DocumentSnapshot documentSnapshot =
                             streamSnapshot.data!.docs[index];
-                        if (documentSnapshot['Role'] == 'Student') {
+                        if (documentSnapshot['Role'] == 'หมอ') {
                           return Card(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_firebase/meunPageCard/card1.dart';
+import 'package:flutter_firebase/meunPageCard/card2.dart';
 
 class Category extends StatefulWidget {
   const Category({super.key});
@@ -11,6 +12,7 @@ class Category extends StatefulWidget {
 }
 
 class _CategoryState extends State<Category> {
+  List urlvideo = [];
   @override
   Widget build(BuildContext context) {
     CollectionReference video = FirebaseFirestore.instance.collection('Video');
@@ -32,7 +34,7 @@ class _CategoryState extends State<Category> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(10, 50, 10, 10),
+                    padding: EdgeInsets.all(15),
                     child: Text(
                       "หมวดท่า",
                       style: TextStyle(fontSize: 30),
@@ -51,22 +53,31 @@ class _CategoryState extends State<Category> {
                           itemBuilder: (context, index) {
                             final DocumentSnapshot documentSnapshot =
                                 streamSnapshot.data!.docs[index];
-                            if (documentSnapshot['RoleVideo'] == '2') {
-                              return Card(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    InkWell(
-                                      onTap: () {},
-                                      child: ListTile(
-                                        title: Text(
-                                          "${documentSnapshot['NameVideo']}",
+                            if (documentSnapshot['RoleVideo'] == 'ต้นคอ') {
+                              return Center(
+                                child: Card(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.push(context,
+                                              CupertinoPageRoute(builder: (_) {
+                                            return Card_2(
+                                                videoname: documentSnapshot);
+                                          }));
+                                        },
+                                        child: ListTile(
+                                          leading: Text(
+                                              "${documentSnapshot['IdVideo']}"),
+                                          title: Text(
+                                              documentSnapshot['NameVideo']),
+                                          subtitle: Text(
+                                              "${documentSnapshot['time']}"),
                                         ),
-                                        subtitle: Text(
-                                            'Music by Julie Gable. Lyrics by Sidney Stein.'),
-                                      ),
-                                    )
-                                  ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               );
                             }
