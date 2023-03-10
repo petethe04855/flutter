@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase/dr/contacts.dart';
+import 'package:flutter_firebase/category/contacts.dart';
 import 'package:flutter_firebase/login/login_page.dart';
 import 'package:flutter_firebase/login/profile.dart';
+import 'package:flutter_firebase/login/register.dart';
 import 'package:flutter_firebase/login/register_test.dart';
+import 'package:flutter_firebase/menu/meun.dart';
 import 'package:flutter_firebase/menu/meunPage.dart';
 import 'package:flutter_firebase/meunPageCard/card1.dart';
 import 'package:flutter_firebase/page_1.dart';
 import 'package:flutter_firebase/start.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_firebase/test/image.dart';
+import 'package:flutter_firebase/test/imagedata.dart';
 import 'package:flutter_firebase/text/chk.dart';
 import 'package:flutter_firebase/text/pro.dart';
 import 'firebase_options.dart';
@@ -32,10 +36,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-          body: Center(
-              child: MeunPage(
-                  //title: "tset",
-                  ))),
+        body: Center(
+          child: Meun(
+              //title: "tset",
+              ),
+        ),
+      ),
     );
   }
 }

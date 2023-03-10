@@ -4,15 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_firebase/meunPageCard/card1.dart';
 import 'package:flutter_firebase/meunPageCard/card2.dart';
 
-class Category extends StatefulWidget {
-  const Category({super.key});
+class Category_neck extends StatefulWidget {
+  const Category_neck({super.key});
 
   @override
-  State<Category> createState() => _CategoryState();
+  State<Category_neck> createState() => _Category_neckState();
 }
 
-class _CategoryState extends State<Category> {
-  List urlvideo = [];
+class _Category_neckState extends State<Category_neck> {
   @override
   Widget build(BuildContext context) {
     CollectionReference video = FirebaseFirestore.instance.collection('Video');
@@ -68,8 +67,7 @@ class _CategoryState extends State<Category> {
                                           }));
                                         },
                                         child: ListTile(
-                                          leading: Text(
-                                              "${documentSnapshot['IdVideo']}"),
+                                          leading: Text(""),
                                           title: Text(
                                               documentSnapshot['NameVideo']),
                                           subtitle: Text(
@@ -81,7 +79,7 @@ class _CategoryState extends State<Category> {
                                 ),
                               );
                             }
-                            return Text("");
+                            return SizedBox();
                           });
                     }
                     return Text("Loading...");

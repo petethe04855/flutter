@@ -75,8 +75,8 @@ class _Card_2State extends State<Card_2> {
   Widget VideoPlayer_list() {
     return Center(
       child: Container(
-        height: 500,
-        width: 350,
+        height: MediaQuery.of(context).size.height / 1.6,
+        width: MediaQuery.of(context).size.width / 1.5,
         child: _controller.value.isInitialized
             ? VideoPlayer(_controller)
             : Container(),

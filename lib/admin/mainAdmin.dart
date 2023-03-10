@@ -1,26 +1,31 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_firebase/firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_firebase/test/main.dart';
+import 'dart:io';
 
-class Contacts extends StatefulWidget {
-  const Contacts({super.key});
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_firebase/admin/updata.dart';
+import 'package:flutter_firebase/model/updataDR.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../category/contacts.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+
+class main_Admin extends StatefulWidget {
+  const main_Admin({super.key});
 
   @override
-  State<Contacts> createState() => _ContactsState();
+  State<main_Admin> createState() => _main_AdminState();
 }
 
-void user() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(Contacts());
-}
-
-class _ContactsState extends State<Contacts> {
+class _main_AdminState extends State<main_Admin> {
+  var status = 1;
+  var uid;
   CollectionReference _userRole =
       FirebaseFirestore.instance.collection('Users');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,17 +58,27 @@ class _ContactsState extends State<Contacts> {
                         final DocumentSnapshot documentSnapshot =
                             streamSnapshot.data!.docs[index];
                         if (documentSnapshot['Role'] == 'หมอ') {
+                          var dataUid = documentSnapshot['uid'];
                           return Card(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 ListTile(
                                   title: Text(
-                                    "${documentSnapshot['first name']} ${documentSnapshot['first name']}",
+                                    "${documentSnapshot['first_name']}",
                                   ),
                                   subtitle: Text(
                                       'Music by Julie Gable. Lyrics by Sidney Stein.'),
                                 ),
+                                IconButton(
+                                    onPressed: () {
+                                      Navigator.push(context,
+                                          CupertinoPageRoute(builder: (_) {
+                                        return updata(
+                                            dataUid: documentSnapshot);
+                                      }));
+                                    },
+                                    icon: Icon(Icons.edit))
                               ],
                             ),
                           );

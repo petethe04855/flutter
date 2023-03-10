@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_firebase/dr/category.dart';
-import 'package:flutter_firebase/dr/contacts.dart';
+import 'package:flutter_firebase/category/category_all.dart';
+import 'package:flutter_firebase/category/category_neck.dart';
+import 'package:flutter_firebase/category/contacts.dart';
 import 'package:flutter_firebase/login/profile.dart';
 import 'package:flutter_firebase/menu/searchPage.dart';
 import 'package:flutter_firebase/meunPageCard/card1.dart';
@@ -58,9 +59,6 @@ class _MeunPageState extends State<MeunPage> {
               ListTile(
                 title: const Text('โปรไฟล์ 1'),
                 onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
                   Navigator.pushReplacement(context,
                       CupertinoPageRoute(builder: (context) => Profile()));
                 },
@@ -132,14 +130,12 @@ class _MeunPageState extends State<MeunPage> {
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Hello World',
-                        ),
+                        Text('Hello World'),
                         TextButton(
                           onPressed: () {
                             Navigator.push(context,
                                 CupertinoPageRoute(builder: (context) {
-                              return Category();
+                              return Category_All();
                             }));
                           },
                           child: const Text('หมวดท่าทั้งหมด'),
@@ -174,9 +170,11 @@ class _MeunPageState extends State<MeunPage> {
                                 InkWell(
                                   onTap: () {
                                     Navigator.push(
-                                        context,
-                                        CupertinoPageRoute(
-                                            builder: (context) => Card_1()));
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) => Category_neck(),
+                                      ),
+                                    );
                                   },
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
@@ -194,15 +192,15 @@ class _MeunPageState extends State<MeunPage> {
                                   alignment: AlignmentDirectional(0, 0),
                                   child: ElevatedButton(
                                     child: const Text(
-                                      'ท่า 2',
+                                      'คอ',
                                       style: TextStyle(fontSize: 20),
                                     ),
                                     onPressed: () {
-                                      Navigator.push(context,
+                                      Navigator.push(
+                                          context,
                                           CupertinoPageRoute(
-                                              builder: (context) {
-                                        return Card_1();
-                                      }));
+                                              builder: (context) =>
+                                                  Category_neck()));
                                     },
                                   ),
                                 ),

@@ -24,6 +24,11 @@ class RegisterService {
   TextEditingController time = TextEditingController();
   TextEditingController phomeNumber = TextEditingController();
   TextEditingController address = TextEditingController();
+  TextEditingController IDline = TextEditingController();
+
+  String URLline = "http://line.me/ti/p/";
+
+  var status = 0;
 
   var symptomAry = [
     'ปวดหลัง',
@@ -64,6 +69,7 @@ class RegisterService {
     print("email.text ${email.text}");
     print("password.text ${password.text}");
     print("password_Confirm.text ${password_Confirm.text}");
+
     // Navigator.pushReplacement(
     //     context, CupertinoPageRoute(builder: (context) => Login_page()));
   }
@@ -72,34 +78,37 @@ class RegisterService {
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
     var user = _auth.currentUser;
     CollectionReference ref = FirebaseFirestore.instance.collection('Users');
+    String url = "$URLline~${IDline.text}";
 
     if (registerService.rool == "ผู้ป่วย") {
       ref.doc(user!.uid).set({
         'uid': user!.uid,
-        'first name': fname.text,
-        'last name': lname.text,
+        'first_name': fname.text,
+        'last_name': lname.text,
         'email': email.text,
         'time': time.text,
         'phomeNumber': phomeNumber.text,
         'address': address.text,
         'symptom': symptomAry_2,
+        'IDLine': IDline,
         'Role': rool,
         'images': file!.name,
       });
     } else {
       ref.doc(user!.uid).set({
         'uid': user!.uid,
-        'first name': fname.text,
-        'last name': lname.text,
+        'first_name': fname.text,
+        'last_name': lname.text,
         'email': email.text,
         'time': time.text,
         'phomeNumber': phomeNumber.text,
         'address': address.text,
+        'Status': status = 0,
         'Role': rool,
         'images': file!.name,
       });
     }
-
+    print(url);
     if (rool == "ผู้ป่วย") {
       print("ผู้ป่วย");
       Navigator.pushReplacement(
@@ -122,7 +131,7 @@ class RegisterService {
       }
     }
     print("registerService.email.text ${email}");
-    print("registerService.password.text ${password.text}");
+    print("registerService.password.text ${password}");
   }
 
   Future<void> _showMyDialog(BuildContext context) async {
@@ -131,18 +140,17 @@ class RegisterService {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('AlertDialog Title'),
+          title: const Text('แจ้งเตือน'),
           content: SingleChildScrollView(
             child: ListBody(
               children: const <Widget>[
                 Text('This is a demo alert dialog.'),
-                Text('Would you like to approve of this message?'),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Approve'),
+              child: const Text('ตกลง'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

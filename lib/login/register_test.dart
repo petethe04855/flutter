@@ -35,8 +35,7 @@ class _Register_testState extends State<Register_test> {
   //
   late bool passwordVisibility = true;
   late bool confirm_passwordVisibility = true;
-  final email = TextEditingController();
-  final password = TextEditingController();
+
   late double height, width;
   bool confirmEnabled = true;
   String errorMessage = "eeeeeeeeeeeeee";
@@ -224,7 +223,6 @@ class _Register_testState extends State<Register_test> {
                             },
                           ),
                         ),
-                        Text(errorMessage),
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 4, vertical: 2),
@@ -292,25 +290,6 @@ class _Register_testState extends State<Register_test> {
                             ),
                           ),
                         ),
-                        // Padding(
-                        //   padding: const EdgeInsets.symmetric(
-                        //       horizontal: 4, vertical: 2),
-                        //   child: TextFormField(
-                        //     validator: MultiValidator([
-                        //       RequiredValidator(errorText: "กรุณาป้อมอีกเมล"),
-                        //       EmailValidator(errorText: "รูปแบบอีเมลไม่ถูกต้อง")
-                        //     ]),
-                        //     controller: registerService.email,
-                        //     enabled: confirmEnabled,
-                        //     keyboardType: TextInputType.emailAddress,
-                        //     decoration: const InputDecoration(
-                        //       border: UnderlineInputBorder(),
-                        //       labelText: 'Email',
-                        //       hintText: 'uesr@Email.com',
-                        //       icon: Icon(Icons.person),
-                        //     ),
-                        //   ),
-                        // ),
                         Padding(
                           // const เป็นค่าคงที่ ไม่สามารถเปลี่ยนค่าได้
                           padding: const EdgeInsets.symmetric(
@@ -348,7 +327,7 @@ class _Register_testState extends State<Register_test> {
                           child: TextFormField(
                             validator: (value) {
                               if (value!.isEmpty) {
-                                return "กรุณาป้อนรหัสผ่าน";
+                                return "กรุณากรอกรหัสผ่าน";
                               } else if (registerService.password.text !=
                                   registerService.password_Confirm.text) {
                                 return "รหัสไม่ตรงกัน";
@@ -439,7 +418,6 @@ class _Register_testState extends State<Register_test> {
                                     horizontal: 4, vertical: 2),
                                 child: _dropdown())
                             : SizedBox(),
-
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Row(

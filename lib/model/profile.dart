@@ -34,8 +34,8 @@ class ProfileEdit {
     ref
         .doc(user!.uid)
         .update({
-          'first name': fname.text,
-          'last name': lname.text,
+          'first_name': fname.text,
+          'last_name': lname.text,
           'time': time.text,
           'phomeNumber': phomeNumber.text,
           'address': address.text,
