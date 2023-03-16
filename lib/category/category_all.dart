@@ -16,6 +16,28 @@ class _Category_AllState extends State<Category_All> {
   @override
   Widget build(BuildContext context) {
     CollectionReference video = FirebaseFirestore.instance.collection('Video');
+    CollectionReference productCollectionRef =
+        FirebaseFirestore.instance.collection('VideoRole');
+    productCollectionRef.get().then((QuerySnapshot querySnapshot) => {
+          querySnapshot.docs.forEach((doc) => {print(doc.data())})
+        });
+    // CollectionReference productTypeCollectionRef = FirebaseFirestore.instance
+    //     .collection('VideoRole')
+    //     .doc()
+    //     .collection('RoleVideo');
+
+    // productTypeCollectionRef.get().then((QuerySnapshot querySnapshot) => {
+    //       querySnapshot.docs.forEach((doc) => {print(doc.data())})
+    //     });
+
+    CollectionReference productTypeCollectionRef = FirebaseFirestore.instance
+        .collection('VideoRole')
+        .doc()
+        .collection('nameVideo');
+
+    productTypeCollectionRef.get().then((QuerySnapshot querySnapshot) => {
+          querySnapshot.docs.forEach((doc) => {print(doc.data())})
+        });
     return Scaffold(
       appBar: AppBar(
         title: const Text("หมวดท่า"),
@@ -44,7 +66,7 @@ class _Category_AllState extends State<Category_All> {
               ),
               Flexible(
                 child: StreamBuilder(
-                  stream: video.snapshots(),
+                  stream: productTypeCollectionRef.snapshots(),
                   builder:
                       (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
                     if (streamSnapshot.hasData) {
@@ -67,11 +89,9 @@ class _Category_AllState extends State<Category_All> {
                                         }));
                                       },
                                       child: ListTile(
-                                        leading: Text(""),
-                                        title:
-                                            Text(documentSnapshot['NameVideo']),
-                                        subtitle:
-                                            Text("${documentSnapshot['time']}"),
+                                        leading: Text("dasdasd"),
+                                        title: Text(""),
+                                        subtitle: Text(""),
                                       ),
                                     )
                                   ],

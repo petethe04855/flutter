@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_firebase/text/pro.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class AddItem extends StatefulWidget {
   const AddItem({super.key});
@@ -46,7 +47,7 @@ class _AddItemState extends State<AddItem> {
     } catch (error) {}
   }
 
-  Updata() {
+  Updata() async {
     if (imageUrl.isEmpty) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Please upload an image')));
@@ -68,6 +69,18 @@ class _AddItemState extends State<AddItem> {
     }
   }
 
+  // Future<String> getNameImage(String getUrlimage) async {
+  //   print("getUrlimage ${getUrlimage}");
+  //   firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+  //       .ref()
+  //       .child('test')
+  //       .child('/' + getUrlimage);
+  //   print("getUrlimage ${getUrlimage}");
+  //   print("ref ${ref}");
+
+  //   return await ref.getDownloadURL();
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,10 +99,11 @@ class _AddItemState extends State<AddItem> {
               TextFormField(
                 controller: _qty,
               ),
-              Icon(
-                Icons.image_not_supported,
-                size: 150,
-              ),
+
+              // Icon(
+              //   Icons.image_not_supported,
+              //   size: 150,
+              // ),
               IconButton(
                   onPressed: () {
                     _ImageSelesFilename();

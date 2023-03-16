@@ -7,7 +7,9 @@ import 'package:flutter_firebase/dr/wait.dart';
 import 'package:flutter_firebase/firebase_options.dart';
 import 'package:flutter_firebase/login/register.dart';
 import 'package:flutter_firebase/login/register_test.dart';
+import 'package:flutter_firebase/menu/meun.dart';
 import 'package:flutter_firebase/menu/meunPage.dart';
+import 'package:flutter_firebase/menu/testmen.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -196,7 +198,7 @@ class _Login_pageState extends State<Login_page> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => MeunPage(),
+              builder: (context) => Meun(/*userdata: documentSnapshot*/),
             ),
           );
         } else if (documentSnapshot.get('Role') == "admin") {

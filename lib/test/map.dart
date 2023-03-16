@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
-class Category extends StatefulWidget {
-  const Category({super.key});
+class Map extends StatefulWidget {
+  const Map({super.key});
 
   @override
-  State<Category> createState() => _CategoryState();
+  State<Map> createState() => _MapState();
 }
 
-class _CategoryState extends State<Category> {
+class _MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     return Scaffold();

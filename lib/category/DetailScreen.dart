@@ -1,19 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:video_player/video_player.dart';
 
-class Card_2 extends StatefulWidget {
+class DetailScreen extends StatefulWidget {
   final DocumentSnapshot videoname;
-
-  const Card_2({super.key, required this.videoname});
+  const DetailScreen({super.key, required this.videoname});
 
   @override
-  State<Card_2> createState() => _Card_2State();
+  State<DetailScreen> createState() => _DetailScreenState();
 }
 
-class _Card_2State extends State<Card_2> {
+class _DetailScreenState extends State<DetailScreen> {
   late VideoPlayerController _controllerVide;
 
   void initState() {
@@ -81,7 +80,9 @@ class _Card_2State extends State<Card_2> {
         width: MediaQuery.of(context).size.width / 1.5,
         child: _controllerVide.value.isInitialized
             ? VideoPlayer(_controllerVide)
-            : Container(),
+            : Container(
+                child: Center(child: CircularProgressIndicator()),
+              ),
       ),
     );
   }

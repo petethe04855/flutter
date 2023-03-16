@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +24,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_firebase/firebase_options.dart';
 import 'package:flutter_firebase/login/login_page.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 import '../model/profile.dart';
 
@@ -34,17 +37,18 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   String? testText;
-  final _formKey_reg = GlobalKey<FormState>();
+  final _formKey_Edit = GlobalKey<FormState>();
   //
   late bool passwordVisibility = true;
   late bool confirm_passwordVisibility = true;
 
   //ตัวแปรไฟล์ อัพโหลดรููปภาพ
-  File? _imageFile;
-  final _picker = ImagePicker();
+  String imageUrl = "";
+  File? selectedImage;
+  String userId = '';
+  late DateTime dateTime;
 
   Uint8List? imageList;
-  String imageUrl = "";
 
   ///แสดงรหัสและซ่อนรหัสผ่าน
   void _toggle() {
@@ -68,51 +72,51 @@ class _ProfileState extends State<Profile> {
         return;
       }
       setState(() {
-        profileEdit.time.text = DateFormat.yMd().format(pickedDate);
+        profileEditMode.time.text = DateFormat.yMd().format(pickedDate);
       });
     });
   }
 
   //ฟังก์ชั่นเปิดไฟล์รูป
 
-  _selectFile(bool imageFrom) async {
-    profileEdit.file = await ImagePicker().pickImage(
-      source: imageFrom ? ImageSource.gallery : ImageSource.camera,
-    );
+  // _selectFile(bool imageFrom) async {
+  //   profileEditMode.file = await ImagePicker().pickImage(
+  //     source: imageFrom ? ImageSource.gallery : ImageSource.camera,
+  //   );
 
-    if (profileEdit.file != null) {
-      setState(() {
-        profileEdit.selectFileName = profileEdit.file!.name;
-        print("profileEdit.file!.name ${profileEdit.file!.name}");
-        //
-      });
-    }
-  }
+  //   if (profileEditMode.file != null) {
+  //     setState(() {
+  //       profileEditMode.selectFileName = profileEditMode.file!.name;
+  //       print("profileEditMode.file!.name ${profileEditMode.file!.name}");
+  //       //
+  //     });
+  //   }
+  // }
 
-  //อัปโหลดรูปขึ้น FirebaseStorage
-  _upLoadFile() async {
-    try {
-      firebase_storage.UploadTask uploadTask;
+  // //อัปโหลดรูปขึ้น FirebaseStorage
+  // _upLoadFile() async {
+  //   try {
+  //     firebase_storage.UploadTask uploadTask;
 
-      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-          .ref()
-          .child('images')
-          .child('/' + profileEdit.file!.name);
+  //     firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+  //         .ref()
+  //         .child('images')
+  //         .child('/' + profileEditMode.file!.name);
 
-      uploadTask = ref.putFile(File(profileEdit.file!.path));
+  //     uploadTask = ref.putFile(File(profileEditMode.file!.path));
 
-      await uploadTask.whenComplete(() => null);
+  //     await uploadTask.whenComplete(() => null);
 
-      imageUrl = await ref.getDownloadURL();
+  //     imageUrl = await ref.getDownloadURL();
 
-      print('UpLoaded Image URL ' + imageUrl);
-      setState(() {});
-    } catch (e) {
-      print(e);
-    }
-  }
+  //     print('UpLoaded Image URL ' + imageUrl);
+  //     setState(() {});
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
-  //เก็บค่า url รูปภาพ
+  // //เก็บค่า url รูปภาพ
   // void showImage(String getUrlimage) async {
   //   print("getUrlimage ${getUrlimage}");
   //   firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
@@ -125,327 +129,298 @@ class _ProfileState extends State<Profile> {
   //   setState(() {});
   // }
 
-  Future<String> getNameImage(String getUrlimage) async {
-    print("getUrlimage ${getUrlimage}");
-    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-        .ref()
-        .child('images')
-        .child('/' + getUrlimage);
+  // Future<String> getNameImage(String getUrlimage) async {
+  //   print("getUrlimage ${getUrlimage}");
+  //   firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+  //       .ref()
+  //       .child('images')
+  //       .child('/' + getUrlimage);
 
-    return await ref.getDownloadURL();
+  //   return await ref.getDownloadURL();
+  // }
+
+  // void initState() {
+  //   // TODO: implement initState
+  //   dateTime = DateTime.now();
+  //   super.initState();
+  // }
+
+  // _selectFile() async {
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles(
+  //     allowMultiple: false,
+  //   );
+
+  //   if (result != null) {
+  //     setState(() {
+  //       selectedImage = File(result.files.single.path!);
+  //     });
+  //   }
+  // }
+
+  // updata() async {
+  //   uploadImageToFirebase(userId);
+  // }
+
+  final ImagePicker _picker = ImagePicker();
+
+  _selectFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+    );
+
+    if (result != null) {
+      setState(() {
+        selectedImage = File(result.files.single.path!);
+      });
+    }
   }
 
+  void updateUserImage(String userId, String imageUrl) {
+    CollectionReference users = FirebaseFirestore.instance.collection('Users');
+    users.doc(userId).update({'images': imageUrl});
+    setState(() {});
+  }
+
+  Future<void> uploadImageToFirebase(String userId) async {
+    if (selectedImage != null) {
+      String fileName = '$userId.jpg';
+      Reference reference =
+          FirebaseStorage.instance.ref().child('images').child('/' + fileName);
+      UploadTask uploadTask = reference.putFile(selectedImage!);
+      TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() {});
+      String downloadURL = await taskSnapshot.ref.getDownloadURL();
+      setState(() {
+        selectedImage = null;
+        imageUrl = downloadURL;
+      });
+      updateUserImage(userId, downloadURL);
+    }
+  }
+
+  updata() async {
+    uploadImageToFirebase(userId);
+  }
+
+  Future<void> getOldImageUrl(String userId) async {
+    String fileName = '$userId.jpg';
+    Reference reference =
+        FirebaseStorage.instance.ref().child('images').child('/' + fileName);
+    try {
+      imageUrl = await reference.getDownloadURL();
+    } catch (e) {
+      imageUrl = '';
+    }
+    setState(() {});
+  }
+
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    userId = _auth.currentUser!.uid;
+    getOldImageUrl(userId);
   }
 
   final _auth = FirebaseAuth.instance;
   final Future<FirebaseApp> firebase = Firebase.initializeApp();
   CollectionReference users = FirebaseFirestore.instance.collection('Users');
 
-  TextEditingController first_namecontroller = TextEditingController();
-  TextEditingController last_namecontroller = TextEditingController();
-  TextEditingController timecontroller = TextEditingController();
-  TextEditingController phomeNumbercontroller = TextEditingController();
-  TextEditingController addresscontroller = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: users.doc(auth.currentUser!.uid).get(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (snapshot.hasError) {
-          return Text("Something went wrong");
-        }
+    final maskFormatter = MaskTextInputFormatter(
+      mask: '+66 ###-###-####',
+    );
+    const sizedBoxSpace = SizedBox(height: 24);
+    print("selectedImage : " + imageUrl);
 
-        if (snapshot.hasData && !snapshot.data!.exists) {
-          return Text("Document does not exist");
-        }
-
-        if (snapshot.connectionState == ConnectionState.done) {
-          Map<String, dynamic> data =
-              snapshot.data!.data() as Map<String, dynamic>;
-          print("snapshot.data ${data}");
-          first_namecontroller.text = data['first_name'];
-          last_namecontroller.text = data['last_name'];
-          timecontroller.text = data['time'];
-          addresscontroller.text = data['address'];
-          //เรียกใช้ void ส่งค่า data['image']
-          //showImage(data['images']);
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text("สมัครสมาชิก"),
-              centerTitle: true,
-              backgroundColor: Color.fromARGB(99, 0, 110, 255),
-              automaticallyImplyLeading: false,
-            ),
-            body: SafeArea(
-              child: GestureDetector(
-                onTap: () => FocusScope.of(context).requestFocus(),
-                child: ListView(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Form(
-                        key: _formKey_reg,
-                        child: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("สมัครสมาชิก"),
+        centerTitle: true,
+        backgroundColor: Color.fromARGB(99, 0, 110, 255),
+        automaticallyImplyLeading: false,
+      ),
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).requestFocus(),
+          child: ListView(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Form(
+                  key: _formKey_Edit,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: Column(
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'สมัครสมาชิก',
-                                      style: TextStyle(fontSize: 24),
-                                    ),
-                                    Text(auth.currentUser!.uid),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                child: Column(
-                                  children: [
-                                    FutureBuilder(
-                                        future: getNameImage(data['images']),
-                                        builder: (BuildContext context,
-                                            AsyncSnapshot snapshotUrl) {
-                                          print(
-                                              "snapshotUrl ${snapshotUrl.data}");
-                                          if (snapshotUrl.hasData) {
-                                            String dataImage = snapshotUrl.data;
-                                            print("imageUrl ${imageUrl}");
-                                            print("dataImage ${dataImage}");
-                                            return Center(
-                                                child: imageUrl != ''
-                                                    ? Image.network(
-                                                        imageUrl,
-                                                        height: 250,
-                                                        width: 250,
-                                                      )
-                                                    : Image.network(
-                                                        dataImage,
-                                                        height: 250,
-                                                        width: 250,
-                                                      ));
-                                          } else {
-                                            return Text("loading...");
-                                          }
-                                        })
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                child: ElevatedButton(
-                                  child: Wrap(
-                                    children: [
-                                      Icon(Icons.camera),
-                                      Text('รูปถ่าย'),
-                                    ],
-                                  ),
-                                  onPressed: () {
-                                    showModalBottomSheet<void>(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.15,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(25),
-                                                topRight: Radius.circular(25)),
-                                          ),
-                                          child: Wrap(
-                                            children: <Widget>[
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              ListTile(
-                                                leading:
-                                                    Icon(Icons.photo_library),
-                                                title: Text(
-                                                  "รูปภาพ",
-                                                  style: TextStyle(),
-                                                ),
-                                                onTap: () {
-                                                  _selectFile(true);
-
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                              ListTile(
-                                                leading:
-                                                    Icon(Icons.photo_library),
-                                                title: Text(
-                                                  "กล่อง",
-                                                  style: TextStyle(),
-                                                ),
-                                                onTap: () {
-                                                  _selectFile(false);
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                child: TextFormField(
-                                  validator: (value) {
-                                    if (value!.isNotEmpty && value.length > 2) {
-                                      return null;
-                                    } else if (value.length < 4 &&
-                                        value.isNotEmpty) {
-                                      return 'กรุณากรอกข้อมูลให้ครบ';
-                                    } else {
-                                      return 'กรุณากรอกข้อมูล';
-                                    }
-                                  },
-                                  keyboardType: TextInputType.name,
-                                  controller: first_namecontroller,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'ชื่อ',
-                                    hintText: 'ชื่อ',
-                                    icon: Icon(Icons.person),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                child: TextFormField(
-                                  validator: (value) {
-                                    if (value!.isNotEmpty && value.length > 2) {
-                                      return null;
-                                    } else if (value.length < 6 &&
-                                        value.isNotEmpty) {
-                                      return 'กรุณากรอกข้อมูลให้ครบ';
-                                    } else {
-                                      return 'กรุณากรอกข้อมูล';
-                                    }
-                                  },
-                                  keyboardType: TextInputType.name,
-                                  controller: last_namecontroller,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'นามสกุล',
-                                    hintText: 'นามสกุล',
-                                    icon: Icon(Icons.person),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                child: TextFormField(
-                                  validator: RequiredValidator(
-                                      errorText: "กรุณาป้อนรหัสผ่าน"),
-                                  keyboardType: TextInputType.phone,
-                                  controller: profileEdit.phomeNumber,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'เบอร์โทรศัพท์',
-                                    hintText: 'เบอร์โทรศัพท์',
-                                    icon: Icon(Icons.phone_android),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                // const เป็นค่าคงที่ ไม่สามารถเปลี่ยนค่าได้
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                child: TextFormField(
-                                  validator: RequiredValidator(
-                                      errorText: "กรุณากรอกวันที่"),
-                                  keyboardType: TextInputType.datetime,
-                                  decoration: InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'เลือกวันเกิด',
-                                    hintText: 'MM-DD-YYYY',
-                                    icon: Icon(Icons.calendar_today_rounded),
-                                  ),
-                                  onTap: _selDatePicker,
-                                  controller: timecontroller,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                child: TextFormField(
-                                  validator: RequiredValidator(
-                                      errorText: "กรุณากรอกที่อยู่"),
-                                  keyboardType: TextInputType.streetAddress,
-                                  controller: profileEdit.address,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'ที่อยู่',
-                                    hintText: 'ที่อยู่',
-                                    icon: Icon(Icons.add_home_sharp),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    EdgeInsetsDirectional.fromSTEB(0, 0, 0, 12),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    profileEdit.updateUser(context);
-                                    //register_Confirm(context)
-                                    if (!_formKey_reg.currentState!
-                                        .validate()) {
-                                      return;
-                                    } else if (profileEdit
-                                            .selectFileName.isEmpty !=
-                                        null) {
-                                    } else {
-                                      setState(() {});
-                                    }
-                                  },
-                                  child: const Text(
-                                    'ลงทะเบียน',
-                                  ),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  //profileEdit.getImage();
-                                  //_upLoadFile();
-                                  setState(() {});
-                                },
-                                child: Text("button Test"),
+                              Text(
+                                'แก้ไขโปรไฟล์',
+                                style: TextStyle(fontSize: 24),
                               ),
                             ],
                           ),
                         ),
-                      ),
+                        Container(
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 150,
+                                height: 150,
+                                child: selectedImage != null
+                                    ? Image.file(
+                                        selectedImage!,
+                                      )
+                                    : (imageUrl.isNotEmpty
+                                        ? Image.network(imageUrl)
+                                        : Container()),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
+                          child: ElevatedButton(
+                            child: Wrap(
+                              children: [
+                                Icon(Icons.camera),
+                                Text('รูปถ่าย'),
+                              ],
+                            ),
+                            onPressed: () {
+                              _selectFile();
+                            },
+                          ),
+                        ),
+                        sizedBoxSpace,
+                        TextFormField(
+                          validator: (value) {
+                            if (value!.isNotEmpty && value.length > 2) {
+                              return null;
+                            } else if (value.length < 4 && value.isNotEmpty) {
+                              return 'กรุณากรอกข้อมูลให้ครบ';
+                            } else {
+                              return 'กรุณากรอกข้อมูล';
+                            }
+                          },
+                          keyboardType: TextInputType.name,
+                          controller: profileEditMode.fname,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            labelText: 'ชื่อ',
+                            icon: Icon(Icons.person),
+                            border: UnderlineInputBorder(),
+                          ),
+                        ),
+                        sizedBoxSpace,
+                        TextFormField(
+                          validator: (value) {
+                            if (value!.isNotEmpty && value.length > 2) {
+                              return null;
+                            } else if (value.length < 6 && value.isNotEmpty) {
+                              return 'กรุณากรอกข้อมูลให้ครบ';
+                            } else {
+                              return 'กรุณากรอกข้อมูล';
+                            }
+                          },
+                          keyboardType: TextInputType.name,
+                          controller: profileEditMode.lname,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            labelText: 'นามสกุล',
+                            hintText: 'นามสกุล',
+                            icon: Icon(Icons.person),
+                            border: UnderlineInputBorder(),
+                          ),
+                        ),
+                        sizedBoxSpace,
+                        TextFormField(
+                          validator:
+                              RequiredValidator(errorText: "เบอร์โทรศัพท์"),
+                          keyboardType: TextInputType.phone,
+                          controller: profileEditMode.phomeNumber,
+                          decoration: const InputDecoration(
+                            border: UnderlineInputBorder(),
+                            filled: true,
+                            labelText: 'เบอร์โทรศัพท์',
+                            hintText: 'เบอร์โทรศัพท์',
+                            icon: Icon(Icons.phone_android),
+                          ),
+                        ),
+                        // const เป็นค่าคงที่ ไม่สามารถเปลี่ยนค่าได้
+                        sizedBoxSpace,
+                        TextFormField(
+                          validator:
+                              RequiredValidator(errorText: "กรุณากรอกวันที่"),
+                          controller: profileEditMode.time,
+                          keyboardType: TextInputType.datetime,
+                          decoration: InputDecoration(
+                            filled: true,
+                            labelText: 'วันเกิด',
+                            hintText: 'วันเกิด',
+                            icon: Icon(Icons.insert_drive_file),
+                            border: UnderlineInputBorder(),
+                            enabled: false,
+                          ),
+                        ),
+                        sizedBoxSpace,
+                        ElevatedButton(
+                          onPressed: () async {
+                            _selDatePicker();
+                          },
+                          child: Text('date'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
+                          child: TextFormField(
+                            validator: RequiredValidator(
+                                errorText: "กรุณากรอกที่อยู่"),
+                            keyboardType: TextInputType.streetAddress,
+                            controller: profileEditMode.address,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              border: UnderlineInputBorder(),
+                              labelText: 'ที่อยู่',
+                              hintText: 'ที่อยู่',
+                              icon: Icon(Icons.add_home_sharp),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 12),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              profileEditMode.updateUser(context);
+                              updata();
+                              //register_Confirm(context)
+                              if (!_formKey_Edit.currentState!.validate()) {
+                                return;
+                              } else if (profileEditMode
+                                      .selectFileName.isEmpty !=
+                                  null) {
+                              } else {
+                                setState(() {
+                                  
+                                });
+                              }
+                            },
+                            child: const Text(
+                              'ลงทะเบียน',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          );
-        }
-
-        void register_Aut(String email, String password) async {
-          CircularProgressIndicator();
-          if (_formKey_reg.currentState!.validate()) {}
-        }
-
-        return Text("loading");
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

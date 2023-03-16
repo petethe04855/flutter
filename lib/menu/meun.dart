@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase/category/RoleVideoType.dart';
 import 'package:flutter_firebase/menu/searchPage.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -31,8 +32,11 @@ class _MeunState extends State<Meun> {
   CollectionReference videoRole =
       FirebaseFirestore.instance.collection('VideoRole');
 
+  Future<void> getVideoRole() async {
+    videoRole = FirebaseFirestore.instance.collection('VideoRole');
+  }
+
   Future<String> getNameImage(String getUrlimage) async {
-    print("getUrlimage ${getUrlimage}");
     firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
         .ref()
         .child('images')
@@ -60,26 +64,14 @@ class _MeunState extends State<Meun> {
           if (snapshot.connectionState == ConnectionState.done) {
             Map<String, dynamic> data =
                 snapshot.data!.data() as Map<String, dynamic>;
-            print("auth-uid ${auth.currentUser!.uid}");
+            String imageUrl = data['images'];
+
             final drawerHeader = UserAccountsDrawerHeader(
               accountName: Text("${data['first_name']}  ${data['last_name']}"),
               accountEmail: Text(data['email']),
               currentAccountPicture: CircleAvatar(
-                  child: FutureBuilder(
-                      future: getNameImage(data['images']),
-                      builder:
-                          (BuildContext context, AsyncSnapshot snapshotUrl) {
-                        print("snapshotUrl ${snapshotUrl.data}");
-                        if (snapshotUrl.hasData) {
-                          String dataImage = snapshotUrl.data;
-                          return ClipOval(
-                              child: Image.network(
-                            dataImage,
-                          ));
-                        } else {
-                          return Text("loading...");
-                        }
-                      })),
+                backgroundImage: NetworkImage(imageUrl),
+              ),
             );
             final drawerItems = ListView(
               children: [
@@ -88,7 +80,7 @@ class _MeunState extends State<Meun> {
                   title: Text('โปรไฟล์'),
                   leading: const Icon(Icons.person_2_outlined),
                   onTap: () {
-                    Navigator.pushReplacement(context,
+                    Navigator.of(context).push(
                         CupertinoPageRoute(builder: (context) => Profile()));
                   },
                 ),
@@ -133,7 +125,7 @@ class _MeunState extends State<Meun> {
                           scrollDirection: Axis.vertical,
                           children: [
                             Text(
-                              'Test',
+                              'ท่ากายภาพ',
                               style: TextStyle(fontSize: 30),
                               textAlign: TextAlign.center,
                             ),
@@ -141,7 +133,7 @@ class _MeunState extends State<Meun> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Hello World'),
+                                Text('หมวดหมู่'),
                                 TextButton(
                                   onPressed: () {
                                     Navigator.push(context,
@@ -156,8 +148,8 @@ class _MeunState extends State<Meun> {
                             Container(
                               height: 100,
                               child: Flexible(
-                                child: StreamBuilder(
-                                    stream: videoRole.snapshots(),
+                                child: FutureBuilder(
+                                    future: videoRole.get(),
                                     builder: (context,
                                         AsyncSnapshot<QuerySnapshot>
                                             streamSnapshot) {
@@ -171,6 +163,20 @@ class _MeunState extends State<Meun> {
                                               streamSnapshot.data!.docs.length,
                                           itemBuilder: (ctx, index) {
                                             return Categories(
+                                              onTap: () {
+                                                Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) => RoleVideoType(
+                                                            id: streamSnapshot
+                                                                .data!
+                                                                .docs[index]
+                                                                .id,
+                                                            collection: streamSnapshot
+                                                                    .data!
+                                                                    .docs[index]
+                                                                [
+                                                                'TypeVideo'])));
+                                              },
                                               VideoRoleTpye: streamSnapshot
                                                   .data!
                                                   .docs[index]['TypeVideo'],
@@ -190,7 +196,7 @@ class _MeunState extends State<Meun> {
               ),
             );
           }
-          return Text("loading");
+          return const CircularProgressIndicator();
         });
   }
 }
@@ -198,7 +204,9 @@ class _MeunState extends State<Meun> {
 class Categories extends StatelessWidget {
   final String VideoRoleTpye;
   final String image;
+  final Function()? onTap;
   const Categories({
+    required this.onTap,
     required this.VideoRoleTpye,
     required this.image,
     Key? key,
@@ -206,6 +214,7 @@ class Categories extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: onTap,
       child: Container(
         margin: EdgeInsets.all(12.0),
         width: size!.width / 2 - 20,

@@ -7,12 +7,13 @@ import 'package:image_picker/image_picker.dart';
 
 final storage = FirebaseStorage.instance;
 
-ProfileEdit profileEdit = ProfileEdit();
+ProfileEdit profileEditMode = ProfileEdit();
 final auth = FirebaseAuth.instance;
 
 class ProfileEdit {
   var selectFileName = "";
   XFile? file;
+  String imageUrl = "";
   TextEditingController fname = TextEditingController();
   TextEditingController lname = TextEditingController();
   TextEditingController email = TextEditingController();
@@ -22,8 +23,6 @@ class ProfileEdit {
   TextEditingController phomeNumber = TextEditingController();
   TextEditingController address = TextEditingController();
   TextEditingController role = TextEditingController();
-
-  var rool = "Student";
 
   updateUser(BuildContext context) {
     CollectionReference ref = FirebaseFirestore.instance.collection('Users');
@@ -39,7 +38,6 @@ class ProfileEdit {
           'time': time.text,
           'phomeNumber': phomeNumber.text,
           'address': address.text,
-          'images': file!.name,
         })
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));

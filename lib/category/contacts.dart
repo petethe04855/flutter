@@ -44,8 +44,8 @@ class _ContactsState extends State<Contacts> {
             ),
           ),
           Flexible(
-            child: StreamBuilder(
-              stream: _userRole.snapshots(),
+            child: FutureBuilder(
+              future: _userRole.get(),
               builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
                 if (streamSnapshot.hasData) {
                   return ListView.builder(
@@ -59,8 +59,6 @@ class _ContactsState extends State<Contacts> {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 ListTile(
-                                  leading:
-                                      Image.network(documentSnapshot['images']),
                                   title: Text(
                                     "${documentSnapshot['first_name']}",
                                   ),
